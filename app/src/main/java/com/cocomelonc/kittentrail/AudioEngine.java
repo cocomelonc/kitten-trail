@@ -1,0 +1,109 @@
+package com.cocomelonc.kittentrail;
+
+import android.media.AudioAttributes;
+import android.media.AudioFormat;
+import android.media.AudioTrack;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+
+/** Tiny procedural bell sounds; no bundled audio, codecs, native libraries, or network access. */
+final class AudioEngine {
+    private static final int SAMPLE_RATE = 22_050;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "kitten-chime");
+        thread.setDaemon(true);
+        return thread;
+    });
+    private volatile boolean closed;
+
+    void playStar(int number) {
+        float base = 523.25f * (1f + number * 0.12f);
+        play(new float[]{base, base * 1.5f}, 0.30f, 0.18f);
+    }
+
+    void playLevelComplete() {
+        play(new float[]{523.25f, 659.25f, 783.99f}, 0.52f, 0.16f);
+    }
+
+    void playJourneyComplete() {
+        play(new float[]{392f, 523.25f, 659.25f, 783.99f}, 0.78f, 0.15f);
+    }
+
+    private void play(float[] frequencies, float durationSeconds, float volume) {
+        if (closed) {
+            return;
+        }
+        try {
+            executor.execute(() -> synthesizeAndPlay(frequencies, durationSeconds, volume));
+        } catch (RejectedExecutionException ignored) {
+            // The activity was closed between the state check and queueing the optional chime.
+        }
+    }
+
+    private void synthesizeAndPlay(float[] frequencies, float durationSeconds, float volume) {
+        int sampleCount = Math.max(256, (int) (SAMPLE_RATE * durationSeconds));
+        short[] pcm = new short[sampleCount];
+        for (int i = 0; i < sampleCount; i++) {
+            double time = i / (double) SAMPLE_RATE;
+            double progress = i / (double) sampleCount;
+            double attack = Math.min(1.0, progress / 0.055);
+            double release = Math.pow(Math.max(0.0, 1.0 - progress), 2.4);
+            double value = 0.0;
+            for (int note = 0; note < frequencies.length; note++) {
+                double stagger = note * 0.055;
+                if (time >= stagger) {
+                    double localTime = time - stagger;
+                    value += Math.sin(Math.PI * 2.0 * frequencies[note] * localTime)
+                            + 0.22 * Math.sin(Math.PI * 4.0 * frequencies[note] * localTime);
+                }
+            }
+            value /= frequencies.length * 1.22;
+            pcm[i] = (short) (Short.MAX_VALUE * volume * attack * release * value);
+        }
+
+        AudioTrack track = null;
+        try {
+            track = new AudioTrack.Builder()
+                    .setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_GAME)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build())
+                    .setAudioFormat(new AudioFormat.Builder()
+                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                            .setSampleRate(SAMPLE_RATE)
+                            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                            .build())
+                    .setBufferSizeInBytes(pcm.length * 2)
+                    .setTransferMode(AudioTrack.MODE_STATIC)
+                    .build();
+            if (track.getState() != AudioTrack.STATE_INITIALIZED
+                    || track.write(pcm, 0, pcm.length) < 0) {
+                return;
+            }
+            track.play();
+            Thread.sleep((long) (durationSeconds * 1000f) + 40L);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+        } catch (RuntimeException ignored) {
+            // Sound is optional; unsupported or unavailable audio must never interrupt play.
+        } finally {
+            if (track != null) {
+                try {
+                    if (track.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
+                        track.stop();
+                    }
+                } catch (IllegalStateException ignored) {
+                    // Some vendor audio stacks invalidate a track during an activity shutdown.
+                }
+                track.release();
+            }
+        }
+    }
+
+    void close() {
+        closed = true;
+        executor.shutdownNow();
+    }
+}

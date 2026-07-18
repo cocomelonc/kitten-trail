@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kitten Trail</string>
+    <string name="game_title">Kitten Trail</string>
+    <string name="game_subtitle">A tiny journey under gentle stars</string>
+    <string name="touch_to_begin">Touch to begin</string>
+    <string name="hold_to_walk">Hold anywhere and the kitten will follow</string>
+    <string name="home_is_waiting">The warm little house is waiting</string>
+    <string name="paused">A tiny pause</string>
+    <string name="touch_to_continue">Touch to continue</string>
+    <string name="level_complete">The trail is glowing!</string>
+    <string name="quest_complete">All stars are home</string>
+    <string name="quest_complete_subtitle">The kitten curls up beneath a peaceful sky</string>
+    <string name="play_again">Touch to wander again</string>
+    <string name="level_1">Dewdrop Meadow</string>
+    <string name="level_2">Lavender Garden</string>
+    <string name="level_3">Moonlit Pond</string>
+    <string name="level_4">Peach Orchard</string>
+    <string name="level_5">Starry Hill</string>
+    <string name="accessibility_game">Kitten Trail. Hold and move your finger to guide the kitten toward three stars and then home.</string>
+    <string name="accessibility_star_found">Star found</string>
+    <string name="accessibility_level_complete">Level complete</string>
+</resources>
