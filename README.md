@@ -5,7 +5,7 @@
 **Author:** `cocomelonc`<br>
 **Copyright:** © 2026 cocomelonc (Zhassulan Zhussupov)
 
-Kitten Trail is a tiny, calm Android game about guiding a kitten through five
+Kitten Trail is a tiny, calm Android game about guiding a kitten through nine
 gentle landscapes, collecting three stars, and returning to a warm little
 house. There are no ads, accounts, purchases, trackers, network calls, timers,
 lives, or game-over screens.
@@ -25,7 +25,7 @@ consistent on every Android device.
 ## Why it is deliberately small
 
 - One-finger play: hold anywhere and the kitten follows.
-- Five short handcrafted levels with soft collision and no failure state.
+- Nine short handcrafted levels with soft collision and no failure state.
 - Hardware-accelerated Android Canvas; no game engine or native `.so` files.
 - Procedural vector-like artwork that stays sharp at every screen density.
 - Local progress only, stored in `SharedPreferences`.
@@ -58,7 +58,7 @@ The complete debug build was clean-installed and exercised on a Pixel 7
 emulator running Android 16/API 36: English and Russian switching, Cyrillic
 font rendering, touch movement, star collection, collision, audio, haptics,
 level completion, app backgrounding, and safe resume-to-pause. Automated tests
-also prove reachability for every objective in all five levels.
+also prove reachability for every objective in all nine levels.
 
 ## Build
 
@@ -96,7 +96,7 @@ alignment, confirms `minSdk=26` / `targetSdk=36`, and rejects unexpected native
 libraries.
 
 The unit tests also perform a grid reachability check from the kitten's start
-position to every star and every home in all five levels.
+position to every star and every home in all nine levels.
 
 ## Controls
 
@@ -112,7 +112,7 @@ app/src/main/java/com/cocomelonc/kittentrail/
   MainActivity.java       edge-to-edge Android host and lifecycle
   KittenTrailView.java    drawing, touch input, particles and UI
   GameWorld.java          testable game rules and collision
-  LevelData.java          five immutable handcrafted levels
+  LevelData.java          nine immutable handcrafted levels
   AudioEngine.java        tiny procedural chime synthesizer
 app/src/test/             gameplay and level reachability tests
 art/                      open-source cover and its generation notes

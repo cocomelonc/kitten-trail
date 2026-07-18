@@ -68,7 +68,10 @@ final class LevelData {
     }
 
     static LevelData[] createAll() {
-        return new LevelData[]{meadow(), lavender(), pond(), orchard(), hill()};
+        return new LevelData[]{
+                meadow(), lavender(), pond(), orchard(), hill(),
+                cloudValley(), rosePath(), mintBrook(), goldenTwilight()
+        };
     }
 
     boolean isCircleFree(float x, float y, float radius) {
@@ -151,6 +154,62 @@ final class LevelData {
                 new Obstacle(POND, 785f, 505f, 120f, 72f),
                 new Obstacle(BUSH, 1035f, 390f, 70f, 46f),
                 new Obstacle(TREE, 250f, 285f, 54f, 45f)
+        );
+    }
+
+    private static LevelData cloudValley() {
+        return new LevelData(
+                R.string.level_6,
+                0xFFF7F1EA, 0xFFDDEAF4, 0xFFC5DCC7, 0xFFE5EEDB, 0xFFA9C7E8, 7289,
+                140f, 130f, 1110f, 580f,
+                new float[]{140f, 130f, 390f, 80f, 760f, 650f, 1110f, 580f},
+                new float[][]{{330f, 215f}, {635f, 480f}, {925f, 525f}},
+                new Obstacle(POND, 500f, 350f, 135f, 80f),
+                new Obstacle(ROCK, 800f, 190f, 60f, 38f),
+                new Obstacle(BUSH, 870f, 410f, 70f, 45f),
+                new Obstacle(TREE, 300f, 520f, 55f, 45f)
+        );
+    }
+
+    private static LevelData rosePath() {
+        return new LevelData(
+                R.string.level_7,
+                0xFFFFF1F2, 0xFFF1DDE5, 0xFFC9D7B8, 0xFFE8E4CE, 0xFFECAFC1, 8363,
+                140f, 570f, 1120f, 560f,
+                new float[]{140f, 570f, 380f, 120f, 810f, 120f, 1120f, 560f},
+                new float[][]{{325f, 395f}, {645f, 170f}, {945f, 390f}},
+                new Obstacle(LAVENDER, 480f, 520f, 90f, 52f),
+                new Obstacle(POND, 750f, 430f, 110f, 65f),
+                new Obstacle(BUSH, 960f, 190f, 70f, 45f),
+                new Obstacle(ROCK, 250f, 210f, 55f, 35f)
+        );
+    }
+
+    private static LevelData mintBrook() {
+        return new LevelData(
+                R.string.level_8,
+                0xFFEAF5F0, 0xFFD4E8E4, 0xFFB4D4C6, 0xFFDCEBDD, 0xFF91CFC1, 9479,
+                125f, 340f, 1125f, 180f,
+                new float[]{125f, 340f, 430f, 650f, 800f, 80f, 1125f, 180f},
+                new float[][]{{330f, 520f}, {665f, 315f}, {950f, 145f}},
+                new Obstacle(POND, 520f, 230f, 135f, 80f),
+                new Obstacle(POND, 840f, 520f, 115f, 70f),
+                new Obstacle(TREE, 335f, 170f, 55f, 45f),
+                new Obstacle(BUSH, 1040f, 430f, 70f, 45f)
+        );
+    }
+
+    private static LevelData goldenTwilight() {
+        return new LevelData(
+                R.string.level_9,
+                0xFFDDD5EC, 0xFFC4C7E3, 0xFF99B8A6, 0xFFC9D5BF, 0xFFF6CF74, 10513,
+                150f, 590f, 1100f, 125f,
+                new float[]{150f, 590f, 420f, 620f, 720f, 150f, 1100f, 125f},
+                new float[][]{{360f, 520f}, {650f, 335f}, {915f, 190f}},
+                new Obstacle(ROCK, 430f, 230f, 70f, 45f),
+                new Obstacle(POND, 735f, 530f, 120f, 75f),
+                new Obstacle(LAVENDER, 940f, 430f, 90f, 52f),
+                new Obstacle(TREE, 240f, 300f, 55f, 45f)
         );
     }
 

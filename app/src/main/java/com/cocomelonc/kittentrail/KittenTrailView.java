@@ -172,9 +172,12 @@ final class KittenTrailView extends View implements GameWorld.Listener {
         drawLanguageSwitch(canvas, GameWorld.WORLD_WIDTH - 104f - safeRightWorld, 53f);
 
         int resume = preferences.getInt(PREF_RESUME_LEVEL, 0);
+        float dotSpacing = world.levelCount() > 7 ? 20f : 24f;
+        float firstDotX = GameWorld.WORLD_WIDTH / 2f
+                - (world.levelCount() - 1) * dotSpacing / 2f;
         for (int i = 0; i < world.levelCount(); i++) {
             paint.setColor(i == resume ? 0xFFFFD778 : 0x70FFF7EE);
-            float x = 602f + i * 24f;
+            float x = firstDotX + i * dotSpacing;
             canvas.drawCircle(x, 665f, i == resume ? 6f : 4f, paint);
         }
     }

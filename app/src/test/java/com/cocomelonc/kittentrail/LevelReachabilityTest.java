@@ -6,6 +6,7 @@
  */
 package com.cocomelonc.kittentrail;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -16,6 +17,15 @@ public final class LevelReachabilityTest {
     private static final int CELL = 24;
     private static final int COLS = (int) GameWorld.WORLD_WIDTH / CELL;
     private static final int ROWS = (int) GameWorld.WORLD_HEIGHT / CELL;
+
+    @Test
+    public void journeyContainsNineThreeStarLevels() {
+        LevelData[] levels = LevelData.createAll();
+        assertEquals(9, levels.length);
+        for (LevelData level : levels) {
+            assertEquals(3, level.stars.length);
+        }
+    }
 
     @Test
     public void everyStarAndHomeAreReachableFromStart() {

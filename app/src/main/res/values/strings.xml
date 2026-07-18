@@ -17,6 +17,10 @@
     <string name="level_3">Moonlit Pond</string>
     <string name="level_4">Peach Orchard</string>
     <string name="level_5">Starry Hill</string>
+    <string name="level_6">Cotton Cloud Valley</string>
+    <string name="level_7">Rose Petal Path</string>
+    <string name="level_8">Minty Brook</string>
+    <string name="level_9">Golden Twilight</string>
     <string name="accessibility_game">Kitten Trail. Hold and move your finger to guide the kitten toward three stars and then home.</string>
     <string name="accessibility_star_found">Star found</string>
     <string name="accessibility_level_complete">Level complete</string>

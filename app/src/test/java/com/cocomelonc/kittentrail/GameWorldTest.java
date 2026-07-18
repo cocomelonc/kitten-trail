@@ -14,6 +14,31 @@ import org.junit.Test;
 
 public final class GameWorldTest {
     @Test
+    public void journeyTraversesAllNineLevelsBeforeQuestComplete() {
+        LevelData[] levels = LevelData.createAll();
+        GameWorld world = new GameWorld(levels, null);
+        world.startJourney(0);
+
+        assertEquals(9, levels.length);
+        for (int levelIndex = 0; levelIndex < levels.length; levelIndex++) {
+            assertEquals(levelIndex, world.levelIndex());
+            for (float[] star : levels[levelIndex].stars) {
+                world.teleportForTest(star[0], star[1]);
+                world.update(1f / 60f);
+            }
+            world.teleportForTest(levels[levelIndex].homeX, levels[levelIndex].homeY);
+            world.update(1f / 60f);
+            assertEquals(GameWorld.State.LEVEL_COMPLETE, world.state());
+
+            world.continueAfterLevel();
+            GameWorld.State expected = levelIndex == levels.length - 1
+                    ? GameWorld.State.QUEST_COMPLETE
+                    : GameWorld.State.PLAYING;
+            assertEquals(expected, world.state());
+        }
+    }
+
+    @Test
     public void collectingEveryStarAndEnteringHomeCompletesLevel() {
         LevelData[] levels = LevelData.createAll();
         GameWorld world = new GameWorld(levels, null);

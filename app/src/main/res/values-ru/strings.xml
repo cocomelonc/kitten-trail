@@ -17,6 +17,10 @@
     <string name="level_3">Лунный пруд</string>
     <string name="level_4">Персиковый сад</string>
     <string name="level_5">Звёздный холм</string>
+    <string name="level_6">Долина мягких облаков</string>
+    <string name="level_7">Тропа розовых лепестков</string>
+    <string name="level_8">Мятный ручеёк</string>
+    <string name="level_9">Золотые сумерки</string>
     <string name="accessibility_game">Тропа котёнка. Удерживай и двигай палец, чтобы помочь котёнку найти три звезды и вернуться домой.</string>
     <string name="accessibility_star_found">Звезда найдена</string>
     <string name="accessibility_level_complete">Уровень пройден</string>
