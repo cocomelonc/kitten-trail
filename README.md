@@ -2,6 +2,9 @@
 
 ![Kitten Trail cover](art/kitten-trail-cover.png)
 
+**Author:** `cocomelonc`<br>
+**Copyright:** © 2026 cocomelonc (Zhassulan Zhussupov)
+
 Kitten Trail is a tiny, calm Android game about guiding a kitten through five
 gentle landscapes, collecting three stars, and returning to a warm little
 house. There are no ads, accounts, purchases, trackers, network calls, timers,
@@ -129,6 +132,10 @@ Google Play Families answers must be updated.
 Project source and original project artwork are available under the MIT
 License. Nunito remains under the SIL Open Font License 1.1; see
 [`third_party/nunito/OFL.txt`](third_party/nunito/OFL.txt).
+
+Kitten Trail was created by **cocomelonc**. The author and copyright notices
+must remain in copies and substantial portions of the project as required by
+the MIT License. See [AUTHORS.md](AUTHORS.md) and [LICENSE](LICENSE).
 
 Contributions and translations are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 

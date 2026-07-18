@@ -1,3 +1,9 @@
+/*
+ * Kitten Trail
+ * Author: cocomelonc
+ * Copyright (c) 2026 cocomelonc (Zhassulan Zhussupov)
+ * SPDX-License-Identifier: MIT
+ */
 package com.cocomelonc.kittentrail;
 
 /** Pure game rules, intentionally independent of Android so they can be unit tested. */
