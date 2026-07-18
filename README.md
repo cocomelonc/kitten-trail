@@ -20,6 +20,12 @@ consistent on every Android device.
 |---|---|
 | ![English title screen](art/runtime-title.png) | ![Russian title screen](art/runtime-title-ru.png) |
 
+The pause card uses a wide safe area, 72 logical pixels of horizontal content
+padding, and a smooth fade-and-scale entrance. Longer Russian text is measured
+and fitted inside the same margins.
+
+![Russian pause card with safe margins](art/runtime-pause-ru.png)
+
 ### Levels
 
 Each landscape has its own gentle palette, path, and obstacle arrangement.

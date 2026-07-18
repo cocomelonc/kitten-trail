@@ -39,6 +39,11 @@ final class KittenTrailView extends View implements GameWorld.Listener {
     private static final String PREF_RESUME_LEVEL = "resume_level";
     private static final String PREF_LANGUAGE = "language";
     private static final float PAUSE_RADIUS = 35f;
+    private static final float OVERLAY_LEFT = 310f;
+    private static final float OVERLAY_TOP = 168f;
+    private static final float OVERLAY_RIGHT = 970f;
+    private static final float OVERLAY_BOTTOM = 552f;
+    private static final float OVERLAY_PADDING = 72f;
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
     private final Paint bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
@@ -71,6 +76,8 @@ final class KittenTrailView extends View implements GameWorld.Listener {
     private float pauseY = 52f;
     private float facing = 1f;
     private float hintTime;
+    private GameWorld.State lastVisualState = GameWorld.State.TITLE;
+    private float overlayProgress = 1f;
 
     KittenTrailView(Context context) {
         super(context);
@@ -119,11 +126,20 @@ final class KittenTrailView extends View implements GameWorld.Listener {
             hintTime += dt;
         }
 
+        GameWorld.State visualState = world.state();
+        if (visualState != lastVisualState) {
+            lastVisualState = visualState;
+            overlayProgress = isOverlayState(visualState) ? 0f : 1f;
+        }
+        if (isOverlayState(visualState) && hostResumed) {
+            overlayProgress = Math.min(1f, overlayProgress + dt * 5.5f);
+        }
+
         drawOutside(canvas);
         canvas.save();
         canvas.translate(viewOffsetX, viewOffsetY);
         canvas.scale(viewScale, viewScale);
-        if (world.state() == GameWorld.State.TITLE) {
+        if (visualState == GameWorld.State.TITLE) {
             drawTitle(canvas, now / 1_000_000_000f);
         } else {
             drawLevel(canvas, now / 1_000_000_000f);
@@ -133,6 +149,10 @@ final class KittenTrailView extends View implements GameWorld.Listener {
         if (hostResumed) {
             postInvalidateOnAnimation();
         }
+    }
+
+    private static boolean isOverlayState(GameWorld.State state) {
+        return state == GameWorld.State.PAUSED || state == GameWorld.State.LEVEL_COMPLETE;
     }
 
     private void drawOutside(Canvas canvas) {
@@ -646,23 +666,40 @@ final class KittenTrailView extends View implements GameWorld.Listener {
     }
 
     private void drawOverlay(Canvas canvas, int titleRes, int subtitleRes, float time, boolean finalCard) {
-        paint.setColor(0x68514B68);
+        float eased = overlayProgress * overlayProgress * (3f - 2f * overlayProgress);
+        paint.setColor(Color.argb(Math.round(104f * eased), 81, 75, 104));
         canvas.drawRect(0f, 0f, GameWorld.WORLD_WIDTH, GameWorld.WORLD_HEIGHT, paint);
-        float pulse = 1f + 0.012f * (float) Math.sin(time * 2.2f);
-        canvas.save();
-        canvas.scale(pulse, pulse, 640f, 360f);
-        drawPill(canvas, 345f, 245f, 935f, 475f, 0xF8FFF8EE, 0x22504B62);
+
+        float cardScale = 0.95f + 0.05f * eased;
+        int layer = canvas.saveLayerAlpha(
+                OVERLAY_LEFT - 12f, OVERLAY_TOP - 12f,
+                OVERLAY_RIGHT + 16f, OVERLAY_BOTTOM + 20f,
+                Math.round(255f * eased)
+        );
+        canvas.scale(cardScale, cardScale, 640f, 360f);
+        paint.setColor(0x22504B62);
+        canvas.drawRoundRect(OVERLAY_LEFT + 4f, OVERLAY_TOP + 7f,
+                OVERLAY_RIGHT + 4f, OVERLAY_BOTTOM + 7f, 46f, 46f, paint);
+        paint.setColor(0xF8FFF8EE);
+        canvas.drawRoundRect(OVERLAY_LEFT, OVERLAY_TOP,
+                OVERLAY_RIGHT, OVERLAY_BOTTOM, 46f, 46f, paint);
+
+        float contentWidth = OVERLAY_RIGHT - OVERLAY_LEFT - OVERLAY_PADDING * 2f;
+        float iconPulse = 1f + 0.025f * (float) Math.sin(time * 2.2f);
         if (!finalCard) {
-            drawStarShape(canvas, 640f, 300f, 27f, 13f, 0xFFFFD875);
+            canvas.save();
+            canvas.scale(iconPulse, iconPulse, 640f, 251f);
+            drawStarShape(canvas, 640f, 251f, 27f, 13f, 0xFFFFD875);
+            canvas.restore();
         }
         drawFittedText(canvas, text(titleRes),
-                640f, 370f, 43f, 500f, 0xFF665D78, true);
+                640f, 355f, 41f, contentWidth, 0xFF665D78, true);
         drawFittedText(canvas, text(subtitleRes),
-                640f, 423f, 22f, 460f, 0xFF8B8296, false);
+                640f, 420f, 22f, contentWidth, 0xFF8B8296, false);
         if (world.state() == GameWorld.State.PAUSED) {
-            drawLanguageSwitch(canvas, 640f, 465f);
+            drawLanguageSwitch(canvas, 640f, 492f);
         }
-        canvas.restore();
+        canvas.restoreToCount(layer);
     }
 
     private void drawQuestComplete(Canvas canvas, float time) {
@@ -943,7 +980,7 @@ final class KittenTrailView extends View implements GameWorld.Listener {
                     }
                     break;
                 case PAUSED:
-                    if (isInsideLanguageSwitch(x, y, 640f, 465f)) {
+                    if (isInsideLanguageSwitch(x, y, 640f, 492f)) {
                         toggleLanguage();
                     } else {
                         world.resume();
