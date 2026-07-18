@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 
-/** Tiny procedural bell sounds; no bundled audio, codecs, native libraries, or network access. */
+/** Gentle procedural chimes; no bundled audio, codecs, native libraries, or network access. */
 final class AudioEngine {
     private static final int SAMPLE_RATE = 22_050;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(runnable -> {
@@ -25,8 +25,8 @@ final class AudioEngine {
     private volatile boolean closed;
 
     void playStar(int number) {
-        float base = 523.25f * (1f + number * 0.12f);
-        play(new float[]{base, base * 1.5f}, 0.30f, 0.18f);
+        float base = 523.25f * (1f + number * 0.07f);
+        play(new float[]{base, base * 1.25f, base * 1.50f}, 0.34f, 0.11f);
     }
 
     void playLevelComplete() {
@@ -54,18 +54,18 @@ final class AudioEngine {
         for (int i = 0; i < sampleCount; i++) {
             double time = i / (double) SAMPLE_RATE;
             double progress = i / (double) sampleCount;
-            double attack = Math.min(1.0, progress / 0.055);
-            double release = Math.pow(Math.max(0.0, 1.0 - progress), 2.4);
+            double attack = Math.min(1.0, progress / 0.05);
+            double release = Math.pow(Math.max(0.0, 1.0 - progress), 2.5);
             double value = 0.0;
             for (int note = 0; note < frequencies.length; note++) {
-                double stagger = note * 0.055;
+                double stagger = note * 0.052;
                 if (time >= stagger) {
                     double localTime = time - stagger;
                     value += Math.sin(Math.PI * 2.0 * frequencies[note] * localTime)
-                            + 0.22 * Math.sin(Math.PI * 4.0 * frequencies[note] * localTime);
+                            + 0.18 * Math.sin(Math.PI * 4.0 * frequencies[note] * localTime);
                 }
             }
-            value /= frequencies.length * 1.22;
+            value /= frequencies.length * 1.18;
             pcm[i] = (short) (Short.MAX_VALUE * volume * attack * release * value);
         }
 
@@ -84,8 +84,8 @@ final class AudioEngine {
                     .setBufferSizeInBytes(pcm.length * 2)
                     .setTransferMode(AudioTrack.MODE_STATIC)
                     .build();
-            if (track.getState() != AudioTrack.STATE_INITIALIZED
-                    || track.write(pcm, 0, pcm.length) < 0) {
+            int written = track.write(pcm, 0, pcm.length);
+            if (written != pcm.length || track.getState() != AudioTrack.STATE_INITIALIZED) {
                 return;
             }
             track.play();
