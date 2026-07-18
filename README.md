@@ -14,15 +14,44 @@ The game starts in English and includes an in-game `EN / RU` language switch.
 Both Latin and Cyrillic use the same bundled Nunito typeface, so typography is
 consistent on every Android device.
 
-## Screenshots
+### Screenshots
 
 | English | Русский |
 |---|---|
 | ![English title screen](art/runtime-title.png) | ![Russian title screen](art/runtime-title-ru.png) |
 
-![Dewdrop Meadow gameplay](art/runtime-level.png)
+### Levels
 
-## Why it is deliberately small
+Each landscape has its own gentle palette, path, and obstacle arrangement.
+
+**Dewdrop Meadow**<br>
+![Dewdrop Meadow gameplay](art/levels/01-dewdrop-meadow.png)     
+
+**Lavender Garden**<br>
+![Lavender Garden gameplay](art/levels/02-lavender-garden.png)    
+
+**Moonlit Pond**<br>
+![Moonlit Pond gameplay](art/levels/03-moonlit-pond.png)    
+
+**Peach Orchard**<br>
+![Peach Orchard gameplay](art/levels/04-peach-orchard.png)   
+
+**Starry Hill**<br>
+![Starry Hill gameplay](art/levels/05-starry-hill.png)    
+
+**Cotton Cloud Valley**<br>
+![Cotton Cloud Valley gameplay](art/levels/06-cotton-cloud-valley.png)    
+
+**Rose Petal Path**<br>
+![Rose Petal Path gameplay](art/levels/07-rose-petal-path.png)    
+
+**Minty Brook**<br>
+![Minty Brook gameplay](art/levels/08-minty-brook.png)    
+
+**Golden Twilight**<br>
+![Golden Twilight gameplay](art/levels/09-golden-twilight.png)    
+
+### Why it is deliberately small
 
 - One-finger play: hold anywhere and the kitten follows.
 - Nine short handcrafted levels with soft collision and no failure state.
@@ -32,7 +61,7 @@ consistent on every Android device.
 - English and Russian resources bundled in every APK/AAB.
 - Procedural bell sounds; no audio codec dependency.
 
-## Android configuration
+### Android configuration
 
 | Setting | Value |
 |---|---:|
@@ -60,7 +89,7 @@ font rendering, touch movement, star collection, collision, audio, haptics,
 level completion, app backgrounding, and safe resume-to-pause. Automated tests
 also prove reachability for every objective in all nine levels.
 
-## Build
+### Build
 
 Install JDK 17 and Android SDK Platform 36, then run:
 
@@ -85,7 +114,7 @@ For a Play-ready Android App Bundle artifact:
 The release AAB is unsigned. Configure your own upload key outside the
 repository; never commit a keystore or its passwords.
 
-## Verification
+### Verification
 
 ```bash
 ./scripts/verify_android.sh
@@ -98,14 +127,14 @@ libraries.
 The unit tests also perform a grid reachability check from the kitten's start
 position to every star and every home in all nine levels.
 
-## Controls
+### Controls
 
 - Hold and move one finger: guide the kitten.
 - Release: stop.
 - Top-right pause button or Android Back: pause.
 - `EN / RU`: switch language on the title or pause screen.
 
-## Project layout
+### Project layout
 
 ```text
 app/src/main/java/com/cocomelonc/kittentrail/
@@ -120,14 +149,14 @@ third_party/nunito/       exact SIL OFL license for the bundled font
 scripts/                  reproducible Android verification
 ```
 
-## Privacy and children
+### Privacy and children
 
 The app is intentionally offline and does not collect or transmit data. See
 [PRIVACY.md](PRIVACY.md). If you publish a modified build with analytics,
 advertising, accounts, or network services, its privacy declarations and
 Google Play Families answers must be updated.
 
-## License
+### License
 
 Project source and original project artwork are available under the MIT
 License. Nunito remains under the SIL Open Font License 1.1; see
@@ -141,7 +170,7 @@ Contributions and translations are welcome. See [CONTRIBUTING.md](CONTRIBUTING.m
 
 ---
 
-## Русский
+### Русский
 
 Kitten Trail - маленькая спокойная Android-игра: помогите котёнку найти три
 звезды и вернуться в тёплый домик. Здесь нет рекламы, регистрации, покупок,
