@@ -4,7 +4,7 @@
     <string name="game_title">Тропа котёнка</string>
     <string name="game_subtitle">Маленькое путешествие под добрыми звёздами</string>
     <string name="touch_to_begin">Коснись, чтобы начать</string>
-    <string name="hold_to_walk">Удерживай палец — котёнок пойдёт за ним</string>
+    <string name="hold_to_walk">Удерживай палец - котёнок пойдёт за ним</string>
     <string name="home_is_waiting">Тёплый домик уже ждёт</string>
     <string name="paused">Маленькая пауза</string>
     <string name="touch_to_continue">Коснись, чтобы продолжить</string>
