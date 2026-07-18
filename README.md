@@ -65,7 +65,8 @@ Each landscape has its own gentle palette, path, and obstacle arrangement.
 - Procedural vector-like artwork that stays sharp at every screen density.
 - Local progress only, stored in `SharedPreferences`.
 - English and Russian resources bundled in every APK/AAB.
-- Procedural bell sounds; no audio codec dependency.
+- Original procedural bell effects and calm background music; no sampled audio
+  files or codec dependency.
 
 ### Android configuration
 
@@ -92,8 +93,9 @@ official Android [`<uses-sdk>` documentation](https://developer.android.com/guid
 The complete debug build was clean-installed and exercised on a Pixel 7
 emulator running Android 16/API 36: English and Russian switching, Cyrillic
 font rendering, touch movement, star collection, collision, audio, haptics,
-level completion, app backgrounding, and safe resume-to-pause. Automated tests
-also prove reachability for every objective in all nine levels.
+music start/pause and Audio Focus release, level completion, app backgrounding,
+and safe resume-to-pause. Automated tests also prove reachability for every
+objective in all nine levels.
 
 ### Build
 
@@ -149,6 +151,7 @@ app/src/main/java/com/cocomelonc/kittentrail/
   GameWorld.java          testable game rules and collision
   LevelData.java          nine immutable handcrafted levels
   AudioEngine.java        tiny procedural chime synthesizer
+  MusicEngine.java        calm original procedural background music
 app/src/test/             gameplay and level reachability tests
 art/                      open-source cover and its generation notes
 third_party/nunito/       exact SIL OFL license for the bundled font
@@ -165,7 +168,8 @@ Google Play Families answers must be updated.
 ### License
 
 Project source and original project artwork are available under the MIT
-License. Nunito remains under the SIL Open Font License 1.1; see
+License. The original sound effects and music are documented in
+[AUDIO.md](AUDIO.md). Nunito remains under the SIL Open Font License 1.1; see
 [`third_party/nunito/OFL.txt`](third_party/nunito/OFL.txt).
 
 Kitten Trail was created by **cocomelonc**. The author and copyright notices

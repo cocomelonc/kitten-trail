@@ -53,6 +53,7 @@ final class KittenTrailView extends View implements GameWorld.Listener {
     private final android.graphics.Typeface bold;
     private final SharedPreferences preferences;
     private final AudioEngine audio = new AudioEngine();
+    private final MusicEngine music;
     private final GameWorld world;
     private final List<Decoration> decorations = new ArrayList<>();
     private final List<Particle> particles = new ArrayList<>();
@@ -81,6 +82,7 @@ final class KittenTrailView extends View implements GameWorld.Listener {
 
     KittenTrailView(Context context) {
         super(context);
+        music = new MusicEngine(context);
         setFocusable(true);
         setFocusableInTouchMode(true);
         setClickable(true);
@@ -127,6 +129,7 @@ final class KittenTrailView extends View implements GameWorld.Listener {
         }
 
         GameWorld.State visualState = world.state();
+        music.setPlaying(hostResumed && visualState == GameWorld.State.PLAYING);
         if (visualState != lastVisualState) {
             lastVisualState = visualState;
             overlayProgress = isOverlayState(visualState) ? 0f : 1f;
@@ -1055,6 +1058,7 @@ final class KittenTrailView extends View implements GameWorld.Listener {
 
     void onHostPause() {
         hostResumed = false;
+        music.setPlaying(false);
         world.pause();
         lastFrameNanos = 0L;
     }
@@ -1067,6 +1071,7 @@ final class KittenTrailView extends View implements GameWorld.Listener {
 
     void close() {
         hostResumed = false;
+        music.close();
         audio.close();
         recycleBackgrounds();
     }
