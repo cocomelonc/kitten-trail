@@ -58,6 +58,9 @@ raised hedge and stone cubes form a clear trail without making the game tense.
 **Golden Twilight**<br>
 ![Golden Twilight gameplay](art/levels/09-golden-twilight.png)    
 
+**Starlit Lullaby**<br>
+![Starlit Lullaby gameplay](art/levels/10-starlit-lullaby.png)    
+
 ### Why it is deliberately small
 
 - One-finger play: tap a free tile and the kitten finds the shortest path.
