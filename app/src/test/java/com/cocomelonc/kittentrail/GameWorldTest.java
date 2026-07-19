@@ -14,84 +14,108 @@ import org.junit.Test;
 
 public final class GameWorldTest {
     @Test
-    public void journeyTraversesAllNineLevelsBeforeQuestComplete() {
-        LevelData[] levels = LevelData.createAll();
-        GameWorld world = new GameWorld(levels, null);
+    public void cubesCannotBeSelected() {
+        GameWorld world = new GameWorld(LevelData.createAll(), null);
         world.startJourney(0);
+        assertFalse(world.tapCell(0, 0));
+        assertEquals(0, world.getPathLength());
 
-        assertEquals(9, levels.length);
-        for (int levelIndex = 0; levelIndex < levels.length; levelIndex++) {
-            assertEquals(levelIndex, world.levelIndex());
-            for (float[] star : levels[levelIndex].stars) {
-                world.teleportForTest(star[0], star[1]);
-                world.update(1f / 60f);
-            }
-            world.teleportForTest(levels[levelIndex].homeX, levels[levelIndex].homeY);
-            world.update(1f / 60f);
-            assertEquals(GameWorld.State.LEVEL_COMPLETE, world.state());
-
-            world.continueAfterLevel();
-            GameWorld.State expected = levelIndex == levels.length - 1
-                    ? GameWorld.State.QUEST_COMPLETE
-                    : GameWorld.State.PLAYING;
-            assertEquals(expected, world.state());
-        }
+        world.startJourney(4);
+        assertFalse(world.tapCell(1, 4));
+        assertEquals(0, world.getPathLength());
     }
 
     @Test
-    public void collectingEveryStarAndEnteringHomeCompletesLevel() {
-        LevelData[] levels = LevelData.createAll();
-        GameWorld world = new GameWorld(levels, null);
+    public void homeWaitsUntilAllStarsAreCollected() {
+        GameWorld world = new GameWorld(LevelData.createAll(), null);
         world.startJourney(0);
-
-        for (float[] star : levels[0].stars) {
-            world.teleportForTest(star[0], star[1]);
-            world.update(1f / 60f);
-        }
-
-        assertEquals(3, world.collectedCount());
-        assertTrue(world.allStarsCollected());
-
-        world.teleportForTest(levels[0].homeX, levels[0].homeY);
-        world.update(1f / 60f);
-        assertEquals(GameWorld.State.LEVEL_COMPLETE, world.state());
-    }
-
-    @Test
-    public void homeDoesNotOpenBeforeAllStarsAreCollected() {
-        LevelData[] levels = LevelData.createAll();
-        GameWorld world = new GameWorld(levels, null);
-        world.startJourney(0);
-        world.teleportForTest(levels[0].homeX, levels[0].homeY);
-
-        world.update(1f / 60f);
-
-        assertEquals(GameWorld.State.PLAYING, world.state());
+        assertFalse(world.tapCell(world.getLevel().homeRow, world.getLevel().homeCol));
+        assertEquals(GameWorld.State.PLAYING, world.getState());
         assertFalse(world.allStarsCollected());
+
+        collectEveryStar(world);
+        assertTrue(world.allStarsCollected());
+        move(world, world.getLevel().homeRow, world.getLevel().homeCol);
+        assertEquals(GameWorld.State.LEVEL_COMPLETE, world.getState());
     }
 
     @Test
-    public void kittenCannotEnterObstacle() {
-        LevelData level = LevelData.createAll()[0];
-        GameWorld world = new GameWorld(new LevelData[]{level}, null);
+    public void allNineTrailsCanBeCompleted() {
+        LevelData[] levels = LevelData.createAll();
+        GameWorld world = new GameWorld(levels, null);
         world.startJourney(0);
-        LevelData.Obstacle pond = level.obstacles.get(0);
-        world.teleportForTest(pond.x - pond.radiusX - GameWorld.KITTEN_RADIUS - 5f, pond.y);
-        world.setPointer(pond.x, pond.y, true);
 
-        for (int i = 0; i < 240; i++) {
-            world.update(1f / 60f);
-            assertFalse(pond.collidesCircle(world.kittenX(), world.kittenY(), GameWorld.KITTEN_RADIUS));
+        for (int levelIndex = 0; levelIndex < levels.length; levelIndex++) {
+            assertEquals(levelIndex, world.getLevelIndex());
+            collectEveryStar(world);
+            assertEquals(3, world.getCollectedCount());
+            move(world, world.getLevel().homeRow, world.getLevel().homeCol);
+            assertEquals(GameWorld.State.LEVEL_COMPLETE, world.getState());
+            world.continueAfterLevel();
         }
+        assertEquals(GameWorld.State.QUEST_COMPLETE, world.getState());
+    }
+
+    @Test
+    public void aNewTapReplacesThePreviousRoute() {
+        GameWorld world = new GameWorld(LevelData.createAll(), null);
+        world.startJourney(0);
+        assertTrue(world.tapCell(5, 1));
+        int firstLength = world.getPathLength();
+        assertTrue(firstLength > 0);
+
+        assertTrue(world.tapCell(1, 2));
+        assertTrue(world.getPathLength() < firstLength);
+        move(world, 1, 2);
+    }
+
+    @Test
+    public void retappingTheCurrentCellMidStepReturnsToItsCenter() {
+        GameWorld world = new GameWorld(LevelData.createAll(), null);
+        world.startJourney(0);
+        int startRow = world.getRow();
+        int startCol = world.getCol();
+        assertTrue(world.tapCell(5, 1));
+        world.update(0.05f);
+        assertTrue(world.getVisualRow() > startRow);
+
+        assertTrue(world.tapCell(startRow, startCol));
+        move(world, startRow, startCol);
+        assertEquals(startRow, world.getVisualRow(), 0.0001f);
+        assertEquals(startCol, world.getVisualCol(), 0.0001f);
     }
 
     @Test
     public void savedLevelIsClampedToAvailableLevels() {
-        LevelData[] levels = LevelData.createAll();
-        GameWorld world = new GameWorld(levels, null);
-
+        GameWorld world = new GameWorld(LevelData.createAll(), null);
         world.startJourney(999);
+        assertEquals(8, world.getLevelIndex());
+        world.startJourney(-5);
+        assertEquals(0, world.getLevelIndex());
+    }
 
-        assertEquals(levels.length - 1, world.levelIndex());
+    private static void collectEveryStar(GameWorld world) {
+        LevelData level = world.getLevel();
+        for (int row = 0; row < LevelData.ROWS; row++) {
+            for (int col = 0; col < LevelData.COLS; col++) {
+                if (level.tileAt(row, col) == LevelData.STAR
+                        && !world.isStarCollected(row, col)) {
+                    move(world, row, col);
+                }
+            }
+        }
+    }
+
+    private static void move(GameWorld world, int row, int col) {
+        assertTrue("No route to " + row + "," + col, world.tapCell(row, col));
+        int guard = 0;
+        while (world.getPathLength() > 0 && world.getState() == GameWorld.State.PLAYING) {
+            world.update(0.1f);
+            if (++guard > 1000) {
+                throw new AssertionError("Movement did not settle");
+            }
+        }
+        assertEquals(row, world.getRow());
+        assertEquals(col, world.getCol());
     }
 }

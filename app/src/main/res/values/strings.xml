@@ -4,8 +4,10 @@
     <string name="game_title">Kitten Trail</string>
     <string name="game_subtitle">A tiny journey under gentle stars</string>
     <string name="touch_to_begin">Touch to begin</string>
-    <string name="hold_to_walk">Hold anywhere and the kitten will follow</string>
-    <string name="home_is_waiting">The warm little house is waiting</string>
+    <string name="tap_to_walk">Tap a free tile - the kitten will find the way</string>
+    <string name="collect_stars">Find three stars, then return to the glowing cottage</string>
+    <string name="star_label">Stars</string>
+    <string name="home_label">Home</string>
     <string name="paused">A tiny pause</string>
     <string name="touch_to_continue">Touch to continue</string>
     <string name="level_complete">The trail is glowing!</string>
@@ -21,7 +23,7 @@
     <string name="level_7">Rose Petal Path</string>
     <string name="level_8">Minty Brook</string>
     <string name="level_9">Golden Twilight</string>
-    <string name="accessibility_game">Kitten Trail. Hold and move your finger to guide the kitten toward three stars and then home.</string>
+    <string name="accessibility_game">Kitten Trail. Tap a free tile to guide the kitten toward three stars and then home.</string>
     <string name="accessibility_star_found">Star found</string>
     <string name="accessibility_level_complete">Level complete</string>
 </resources>

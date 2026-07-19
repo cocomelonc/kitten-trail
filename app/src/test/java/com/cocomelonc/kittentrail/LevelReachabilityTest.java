@@ -7,6 +7,7 @@
 package com.cocomelonc.kittentrail;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -14,90 +15,69 @@ import org.junit.Test;
 import java.util.ArrayDeque;
 
 public final class LevelReachabilityTest {
-    private static final int CELL = 24;
-    private static final int COLS = (int) GameWorld.WORLD_WIDTH / CELL;
-    private static final int ROWS = (int) GameWorld.WORLD_HEIGHT / CELL;
-
     @Test
-    public void journeyContainsNineThreeStarLevels() {
+    public void journeyContainsNineValidThreeStarTilemaps() {
         LevelData[] levels = LevelData.createAll();
         assertEquals(9, levels.length);
         for (LevelData level : levels) {
-            assertEquals(3, level.stars.length);
+            assertEquals(3, level.starCount);
+            assertEquals(LevelData.START, level.tileAt(level.startRow, level.startCol));
+            assertEquals(LevelData.HOME, level.tileAt(level.homeRow, level.homeCol));
         }
     }
 
     @Test
     public void everyStarAndHomeAreReachableFromStart() {
-        for (LevelData level : LevelData.createAll()) {
-            boolean[][] reached = flood(level, level.startX, level.startY);
-            for (float[] star : level.stars) {
-                assertTrue("Unreachable star in level " + level.nameRes,
-                        isReachedNear(reached, star[0], star[1]));
+        LevelData[] levels = LevelData.createAll();
+        for (int levelIndex = 0; levelIndex < levels.length; levelIndex++) {
+            LevelData level = levels[levelIndex];
+            boolean[][] reached = flood(level);
+            assertTrue("Home is isolated in level " + (levelIndex + 1),
+                    reached[level.homeRow][level.homeCol]);
+            for (int row = 0; row < LevelData.ROWS; row++) {
+                for (int col = 0; col < LevelData.COLS; col++) {
+                    if (level.tileAt(row, col) == LevelData.STAR) {
+                        assertTrue("Star is isolated in level " + (levelIndex + 1)
+                                        + " at " + row + "," + col,
+                                reached[row][col]);
+                    }
+                }
             }
-            assertTrue("Unreachable home in level " + level.nameRes,
-                    isReachedNear(reached, level.homeX, level.homeY));
         }
     }
 
     @Test
-    public void startsStarsAndHomesDoNotOverlapObstacles() {
+    public void bordersAndSolidCubesAreNeverWalkable() {
         for (LevelData level : LevelData.createAll()) {
-            assertTrue(level.isCircleFree(level.startX, level.startY, GameWorld.KITTEN_RADIUS));
-            assertTrue(level.isCircleFree(level.homeX, level.homeY, GameWorld.KITTEN_RADIUS));
-            for (float[] star : level.stars) {
-                assertTrue(level.isCircleFree(star[0], star[1], GameWorld.KITTEN_RADIUS));
+            assertFalse(level.isWalkable(-1, 0));
+            assertFalse(level.isWalkable(0, LevelData.COLS));
+            for (int col = 0; col < LevelData.COLS; col++) {
+                assertFalse(level.isWalkable(0, col));
+                assertFalse(level.isWalkable(LevelData.ROWS - 1, col));
             }
         }
     }
 
-    private static boolean[][] flood(LevelData level, float startX, float startY) {
-        boolean[][] reached = new boolean[ROWS][COLS];
-        ArrayDeque<Integer> queue = new ArrayDeque<>();
-        int startCol = clamp((int) startX / CELL, 0, COLS - 1);
-        int startRow = clamp((int) startY / CELL, 0, ROWS - 1);
-        reached[startRow][startCol] = true;
-        queue.add(startRow * COLS + startCol);
-        int[] dc = {1, -1, 0, 0};
-        int[] dr = {0, 0, 1, -1};
-
-        while (!queue.isEmpty()) {
-            int value = queue.removeFirst();
-            int row = value / COLS;
-            int col = value % COLS;
-            for (int i = 0; i < 4; i++) {
-                int nextCol = col + dc[i];
-                int nextRow = row + dr[i];
-                if (nextCol < 0 || nextRow < 0 || nextCol >= COLS || nextRow >= ROWS
-                        || reached[nextRow][nextCol]) {
-                    continue;
+    private static boolean[][] flood(LevelData level) {
+        boolean[][] reached = new boolean[LevelData.ROWS][LevelData.COLS];
+        ArrayDeque<Integer> open = new ArrayDeque<>();
+        reached[level.startRow][level.startCol] = true;
+        open.add(level.startRow * LevelData.COLS + level.startCol);
+        int[] rowStep = {-1, 0, 1, 0};
+        int[] colStep = {0, 1, 0, -1};
+        while (!open.isEmpty()) {
+            int current = open.removeFirst();
+            int row = current / LevelData.COLS;
+            int col = current % LevelData.COLS;
+            for (int direction = 0; direction < rowStep.length; direction++) {
+                int nextRow = row + rowStep[direction];
+                int nextCol = col + colStep[direction];
+                if (level.isWalkable(nextRow, nextCol) && !reached[nextRow][nextCol]) {
+                    reached[nextRow][nextCol] = true;
+                    open.add(nextRow * LevelData.COLS + nextCol);
                 }
-                float x = nextCol * CELL + CELL / 2f;
-                float y = nextRow * CELL + CELL / 2f;
-                if (!level.isCircleFree(x, y, GameWorld.KITTEN_RADIUS)) {
-                    continue;
-                }
-                reached[nextRow][nextCol] = true;
-                queue.add(nextRow * COLS + nextCol);
             }
         }
         return reached;
-    }
-
-    private static boolean isReachedNear(boolean[][] reached, float x, float y) {
-        int col = clamp((int) x / CELL, 0, COLS - 1);
-        int row = clamp((int) y / CELL, 0, ROWS - 1);
-        for (int r = Math.max(0, row - 2); r <= Math.min(ROWS - 1, row + 2); r++) {
-            for (int c = Math.max(0, col - 2); c <= Math.min(COLS - 1, col + 2); c++) {
-                if (reached[r][c]) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
     }
 }

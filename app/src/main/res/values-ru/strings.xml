@@ -4,8 +4,10 @@
     <string name="game_title">Тропа котёнка</string>
     <string name="game_subtitle">Маленькое путешествие под добрыми звёздами</string>
     <string name="touch_to_begin">Коснись, чтобы начать</string>
-    <string name="hold_to_walk">Удерживай палец - котёнок пойдёт за ним</string>
-    <string name="home_is_waiting">Тёплый домик уже ждёт</string>
+    <string name="tap_to_walk">Коснись свободной клетки - котёнок сам найдёт путь</string>
+    <string name="collect_stars">Найди три звезды и вернись в сияющий домик</string>
+    <string name="star_label">Звёзды</string>
+    <string name="home_label">Домик</string>
     <string name="paused">Маленькая пауза</string>
     <string name="touch_to_continue">Коснись, чтобы продолжить</string>
     <string name="level_complete">Тропа засияла!</string>
@@ -21,7 +23,7 @@
     <string name="level_7">Тропа розовых лепестков</string>
     <string name="level_8">Мятный ручеёк</string>
     <string name="level_9">Золотые сумерки</string>
-    <string name="accessibility_game">Тропа котёнка. Удерживай и двигай палец, чтобы помочь котёнку найти три звезды и вернуться домой.</string>
+    <string name="accessibility_game">Тропа котёнка. Коснись свободной клетки, чтобы помочь котёнку найти три звезды и вернуться домой.</string>
     <string name="accessibility_star_found">Звезда найдена</string>
     <string name="accessibility_level_complete">Уровень пройден</string>
 </resources>

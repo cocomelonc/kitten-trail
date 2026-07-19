@@ -6,15 +6,11 @@
  */
 package com.cocomelonc.kittentrail;
 
-/** Pure game rules, intentionally independent of Android so they can be unit tested. */
-final class GameWorld {
-    static final float WORLD_WIDTH = 1280f;
-    static final float WORLD_HEIGHT = 720f;
-    static final float KITTEN_RADIUS = 23f;
-    private static final float MAX_SPEED = 255f;
-    private static final float STAR_RADIUS = 43f;
-    private static final float HOME_RADIUS = 66f;
+import java.util.ArrayDeque;
+import java.util.Arrays;
 
+/** Pure-Java star collection and shortest-path movement rules. */
+final class GameWorld {
     enum State {
         TITLE,
         PLAYING,
@@ -24,56 +20,58 @@ final class GameWorld {
     }
 
     interface Listener {
-        void onStarCollected(int collectedCount);
+        void onStarCollected(float col, float row, int collectedCount);
 
         void onLevelComplete(int completedLevel);
 
         void onJourneyComplete();
     }
 
+    private static final float MOVE_SPEED = 4.8f;
+    private static final int[] ROW_STEP = {-1, 0, 1, 0};
+    private static final int[] COL_STEP = {0, 1, 0, -1};
+
     private final LevelData[] levels;
     private final Listener listener;
-    private final boolean[] collected = new boolean[3];
+    private final ArrayDeque<Integer> path = new ArrayDeque<>();
 
     private State state = State.TITLE;
+    private LevelData level;
     private int levelIndex;
-    private float kittenX;
-    private float kittenY;
-    private float targetX;
-    private float targetY;
-    private float velocityX;
-    private float velocityY;
-    private float journeyTime;
-    private boolean pointerDown;
+    private int row;
+    private int col;
+    private float visualRow;
+    private float visualCol;
+    private float facing = 1f;
+    private boolean[][] collectedStars;
+    private int collectedCount;
 
     GameWorld(LevelData[] levels, Listener listener) {
         if (levels == null || levels.length == 0) {
-            throw new IllegalArgumentException("At least one level is required");
+            throw new IllegalArgumentException("At least one trail is required");
         }
         this.levels = levels.clone();
         this.listener = listener;
         loadLevel(0);
+        state = State.TITLE;
     }
 
-    void startJourney(int savedLevel) {
-        loadLevel(clamp(savedLevel, 0, levels.length - 1));
+    void startJourney(int requestedLevel) {
+        loadLevel(clampLevel(requestedLevel));
         state = State.PLAYING;
     }
 
     void restartJourney() {
-        loadLevel(0);
-        state = State.PLAYING;
+        startJourney(0);
     }
 
-    void setPointer(float x, float y, boolean down) {
-        pointerDown = down;
-        targetX = clamp(x, 45f, WORLD_WIDTH - 45f);
-        targetY = clamp(y, 78f, WORLD_HEIGHT - 45f);
+    void showTitle() {
+        path.clear();
+        state = State.TITLE;
     }
 
     void pause() {
         if (state == State.PLAYING) {
-            pointerDown = false;
             state = State.PAUSED;
         }
     }
@@ -81,6 +79,110 @@ final class GameWorld {
     void resume() {
         if (state == State.PAUSED) {
             state = State.PLAYING;
+        }
+    }
+
+    boolean tapCell(int targetRow, int targetCol) {
+        if (state != State.PLAYING || !level.isWalkable(targetRow, targetCol)) {
+            return false;
+        }
+        if (level.tileAt(targetRow, targetCol) == LevelData.HOME && !allStarsCollected()) {
+            return false;
+        }
+        int routeStartRow = row;
+        int routeStartCol = col;
+        int pendingCell = -1;
+        if (!path.isEmpty()
+                && Math.hypot(visualRow - row, visualCol - col) > 0.0001f) {
+            pendingCell = path.peekFirst();
+            routeStartRow = pendingCell / LevelData.COLS;
+            routeStartCol = pendingCell % LevelData.COLS;
+        }
+        if (targetRow == row && targetCol == col) {
+            path.clear();
+            if (pendingCell >= 0) {
+                path.add(encode(row, col));
+            }
+            return true;
+        }
+
+        int total = LevelData.ROWS * LevelData.COLS;
+        int[] parent = new int[total];
+        Arrays.fill(parent, -1);
+        boolean[] visited = new boolean[total];
+        ArrayDeque<Integer> open = new ArrayDeque<>();
+        int start = encode(routeStartRow, routeStartCol);
+        int goal = encode(targetRow, targetCol);
+        visited[start] = true;
+        open.add(start);
+
+        while (!open.isEmpty() && !visited[goal]) {
+            int current = open.removeFirst();
+            int currentRow = current / LevelData.COLS;
+            int currentCol = current % LevelData.COLS;
+            for (int direction = 0; direction < ROW_STEP.length; direction++) {
+                int nextRow = currentRow + ROW_STEP[direction];
+                int nextCol = currentCol + COL_STEP[direction];
+                if (!level.isWalkable(nextRow, nextCol)) {
+                    continue;
+                }
+                if (!allStarsCollected()
+                        && level.tileAt(nextRow, nextCol) == LevelData.HOME) {
+                    continue;
+                }
+                int next = encode(nextRow, nextCol);
+                if (visited[next]) {
+                    continue;
+                }
+                visited[next] = true;
+                parent[next] = current;
+                open.addLast(next);
+            }
+        }
+
+        if (!visited[goal]) {
+            return false;
+        }
+        ArrayDeque<Integer> reversed = new ArrayDeque<>();
+        for (int cursor = goal; cursor != start; cursor = parent[cursor]) {
+            reversed.addFirst(cursor);
+        }
+        path.clear();
+        if (pendingCell >= 0) {
+            path.add(pendingCell);
+        }
+        path.addAll(reversed);
+        return true;
+    }
+
+    void update(float elapsedSeconds) {
+        if (state != State.PLAYING || path.isEmpty()) {
+            return;
+        }
+        float remaining = MOVE_SPEED * Math.min(Math.max(elapsedSeconds, 0f), 0.1f);
+        while (remaining > 0f && !path.isEmpty() && state == State.PLAYING) {
+            int next = path.peekFirst();
+            int nextRow = next / LevelData.COLS;
+            int nextCol = next % LevelData.COLS;
+            float deltaRow = nextRow - visualRow;
+            float deltaCol = nextCol - visualCol;
+            float distance = (float) Math.hypot(deltaRow, deltaCol);
+            if (deltaCol != 0f) {
+                facing = Math.signum(deltaCol);
+            }
+            if (distance <= remaining + 0.0001f) {
+                visualRow = nextRow;
+                visualCol = nextCol;
+                row = nextRow;
+                col = nextCol;
+                remaining -= distance;
+                path.removeFirst();
+                enterCell();
+            } else {
+                visualRow += deltaRow / distance * remaining;
+                visualCol += deltaCol / distance * remaining;
+                remaining = 0f;
+            }
         }
     }
 
@@ -93,91 +195,24 @@ final class GameWorld {
             if (listener != null) {
                 listener.onJourneyComplete();
             }
-        } else {
-            loadLevel(levelIndex + 1);
-            state = State.PLAYING;
-        }
-    }
-
-    void showTitle() {
-        pointerDown = false;
-        velocityX = 0f;
-        velocityY = 0f;
-        state = State.TITLE;
-    }
-
-    void update(float deltaSeconds) {
-        if (state != State.PLAYING) {
             return;
         }
-        float dt = clamp(deltaSeconds, 0f, 1f / 20f);
-        journeyTime += dt;
-
-        if (pointerDown) {
-            float dx = targetX - kittenX;
-            float dy = targetY - kittenY;
-            float distance = length(dx, dy);
-            if (distance > 3f) {
-                float desiredSpeed = MAX_SPEED * Math.min(1f, distance / 72f);
-                float desiredX = dx / distance * desiredSpeed;
-                float desiredY = dy / distance * desiredSpeed;
-                float smoothing = Math.min(1f, dt * 11f);
-                velocityX += (desiredX - velocityX) * smoothing;
-                velocityY += (desiredY - velocityY) * smoothing;
-            } else {
-                velocityX *= 0.72f;
-                velocityY *= 0.72f;
-            }
-        } else {
-            float damping = (float) Math.pow(0.001f, dt);
-            velocityX *= damping;
-            velocityY *= damping;
-        }
-
-        moveWithCollisions(velocityX * dt, velocityY * dt);
-        collectNearbyStars();
-        checkHome();
+        loadLevel(levelIndex + 1);
+        state = State.PLAYING;
     }
 
-    private void moveWithCollisions(float dx, float dy) {
-        LevelData level = currentLevel();
-        float nextX = clamp(kittenX + dx, 45f + KITTEN_RADIUS, WORLD_WIDTH - 45f - KITTEN_RADIUS);
-        if (level.isCircleFree(nextX, kittenY, KITTEN_RADIUS)) {
-            kittenX = nextX;
-        } else {
-            velocityX *= -0.08f;
-        }
-
-        float nextY = clamp(kittenY + dy, 78f + KITTEN_RADIUS, WORLD_HEIGHT - 45f - KITTEN_RADIUS);
-        if (level.isCircleFree(kittenX, nextY, KITTEN_RADIUS)) {
-            kittenY = nextY;
-        } else {
-            velocityY *= -0.08f;
-        }
-    }
-
-    private void collectNearbyStars() {
-        float[][] stars = currentLevel().stars;
-        for (int i = 0; i < collected.length; i++) {
-            if (!collected[i] && distanceSquared(kittenX, kittenY, stars[i][0], stars[i][1])
-                    <= STAR_RADIUS * STAR_RADIUS) {
-                collected[i] = true;
-                if (listener != null) {
-                    listener.onStarCollected(collectedCount());
-                }
+    private void enterCell() {
+        char tile = level.tileAt(row, col);
+        if (tile == LevelData.STAR && !collectedStars[row][col]) {
+            collectedStars[row][col] = true;
+            collectedCount++;
+            if (listener != null) {
+                listener.onStarCollected(visualCol, visualRow, collectedCount);
             }
         }
-    }
 
-    private void checkHome() {
-        if (!allStarsCollected()) {
-            return;
-        }
-        LevelData level = currentLevel();
-        if (distanceSquared(kittenX, kittenY, level.homeX, level.homeY) <= HOME_RADIUS * HOME_RADIUS) {
-            pointerDown = false;
-            velocityX = 0f;
-            velocityY = 0f;
+        if (tile == LevelData.HOME && allStarsCollected()) {
+            path.clear();
             state = State.LEVEL_COMPLETE;
             if (listener != null) {
                 listener.onLevelComplete(levelIndex);
@@ -187,106 +222,74 @@ final class GameWorld {
 
     private void loadLevel(int index) {
         levelIndex = index;
-        for (int i = 0; i < collected.length; i++) {
-            collected[i] = false;
-        }
-        LevelData level = levels[index];
-        kittenX = level.startX;
-        kittenY = level.startY;
-        targetX = kittenX;
-        targetY = kittenY;
-        velocityX = 0f;
-        velocityY = 0f;
-        journeyTime = 0f;
-        pointerDown = false;
+        level = levels[levelIndex];
+        row = level.startRow;
+        col = level.startCol;
+        visualRow = row;
+        visualCol = col;
+        facing = 1f;
+        collectedCount = 0;
+        collectedStars = new boolean[LevelData.ROWS][LevelData.COLS];
+        path.clear();
     }
 
-    State state() {
+    private int clampLevel(int requestedLevel) {
+        return Math.max(0, Math.min(requestedLevel, levels.length - 1));
+    }
+
+    private static int encode(int encodedRow, int encodedCol) {
+        return encodedRow * LevelData.COLS + encodedCol;
+    }
+
+    State getState() {
         return state;
     }
 
-    int levelIndex() {
+    LevelData getLevel() {
+        return level;
+    }
+
+    int getLevelIndex() {
         return levelIndex;
     }
 
-    int levelCount() {
+    int getLevelCount() {
         return levels.length;
     }
 
-    LevelData currentLevel() {
-        return levels[levelIndex];
+    int getRow() {
+        return row;
     }
 
-    float kittenX() {
-        return kittenX;
+    int getCol() {
+        return col;
     }
 
-    float kittenY() {
-        return kittenY;
+    float getVisualRow() {
+        return visualRow;
     }
 
-    float targetX() {
-        return targetX;
+    float getVisualCol() {
+        return visualCol;
     }
 
-    float targetY() {
-        return targetY;
+    float getFacing() {
+        return facing;
     }
 
-    float velocityX() {
-        return velocityX;
+    int getCollectedCount() {
+        return collectedCount;
     }
 
-    float velocityY() {
-        return velocityY;
-    }
-
-    float journeyTime() {
-        return journeyTime;
-    }
-
-    boolean isPointerDown() {
-        return pointerDown;
-    }
-
-    boolean isStarCollected(int index) {
-        return collected[index];
-    }
-
-    int collectedCount() {
-        int count = 0;
-        for (boolean value : collected) {
-            if (value) {
-                count++;
-            }
-        }
-        return count;
+    int getPathLength() {
+        return path.size();
     }
 
     boolean allStarsCollected() {
-        return collectedCount() == collected.length;
+        return collectedCount == level.starCount;
     }
 
-    void teleportForTest(float x, float y) {
-        kittenX = x;
-        kittenY = y;
-    }
-
-    private static float distanceSquared(float ax, float ay, float bx, float by) {
-        float dx = bx - ax;
-        float dy = by - ay;
-        return dx * dx + dy * dy;
-    }
-
-    private static float length(float x, float y) {
-        return (float) Math.sqrt(x * x + y * y);
-    }
-
-    private static int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
-    private static float clamp(float value, float min, float max) {
-        return Math.max(min, Math.min(max, value));
+    boolean isStarCollected(int checkRow, int checkCol) {
+        return collectedStars[checkRow][checkCol];
     }
 }

@@ -28,7 +28,8 @@ and fitted inside the same margins.
 
 ### Levels
 
-Each landscape has its own gentle palette, path, and obstacle arrangement.
+Each landscape has its own gentle palette and handcrafted 14 x 8 tilemap. Soft
+raised hedge and stone cubes form a clear trail without making the game tense.
 
 **Dewdrop Meadow**<br>
 ![Dewdrop Meadow gameplay](art/levels/01-dewdrop-meadow.png)     
@@ -59,8 +60,8 @@ Each landscape has its own gentle palette, path, and obstacle arrangement.
 
 ### Why it is deliberately small
 
-- One-finger play: hold anywhere and the kitten follows.
-- Nine short handcrafted levels with soft collision and no failure state.
+- One-finger play: tap a free tile and the kitten finds the shortest path.
+- Nine short handcrafted tilemaps with solid cubes and no failure state.
 - Hardware-accelerated Android Canvas; no game engine or native `.so` files.
 - Procedural vector-like artwork that stays sharp at every screen density.
 - Local progress only, stored in `SharedPreferences`.
@@ -92,10 +93,10 @@ official Android [`<uses-sdk>` documentation](https://developer.android.com/guid
 
 The complete debug build was clean-installed and exercised on a Pixel 7
 emulator running Android 16/API 36: English and Russian switching, Cyrillic
-font rendering, touch movement, star collection, collision, audio, haptics,
-music start/pause and Audio Focus release, level completion, app backgrounding,
-and safe resume-to-pause. Automated tests also prove reachability for every
-objective in all nine levels.
+font rendering, tap-to-path movement, blocked cubes and locked-home behavior,
+star collection, audio, haptics, music start/pause and Audio Focus release,
+level completion, app backgrounding, and safe resume-to-pause. Automated tests
+also prove reachability for every objective in all nine levels.
 
 ### Build
 
@@ -132,13 +133,13 @@ It runs unit tests, strict lint, builds the APK, verifies its signature and ZIP
 alignment, confirms `minSdk=26` / `targetSdk=36`, and rejects unexpected native
 libraries.
 
-The unit tests also perform a grid reachability check from the kitten's start
-position to every star and every home in all nine levels.
+The unit tests validate every tilemap and perform a grid reachability check
+from the kitten's start position to every star and home in all nine levels.
 
 ### Controls
 
-- Hold and move one finger: guide the kitten.
-- Release: stop.
+- Tap any free tile: the kitten follows the shortest available route.
+- Tap another tile while walking: replace the route.
 - Top-right pause button or Android Back: pause.
 - `EN / RU`: switch language on the title or pause screen.
 
@@ -148,8 +149,8 @@ position to every star and every home in all nine levels.
 app/src/main/java/com/cocomelonc/kittentrail/
   MainActivity.java       edge-to-edge Android host and lifecycle
   KittenTrailView.java    drawing, touch input, particles and UI
-  GameWorld.java          testable game rules and collision
-  LevelData.java          nine immutable handcrafted levels
+  GameWorld.java          testable rules and shortest-path movement
+  LevelData.java          nine immutable 14 x 8 tilemaps and palettes
   AudioEngine.java        tiny procedural chime synthesizer
   MusicEngine.java        calm original procedural background music
 app/src/test/             gameplay and level reachability tests
