@@ -16,9 +16,9 @@ import java.util.ArrayDeque;
 
 public final class LevelReachabilityTest {
     @Test
-    public void journeyContainsNineValidThreeStarTilemaps() {
+    public void journeyContainsTenValidThreeStarTilemaps() {
         LevelData[] levels = LevelData.createAll();
-        assertEquals(9, levels.length);
+        assertEquals(10, levels.length);
         for (LevelData level : levels) {
             assertEquals(3, level.starCount);
             assertEquals(LevelData.START, level.tileAt(level.startRow, level.startCol));

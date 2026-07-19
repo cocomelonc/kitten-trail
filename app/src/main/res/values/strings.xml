@@ -23,6 +23,7 @@
     <string name="level_7">Rose Petal Path</string>
     <string name="level_8">Minty Brook</string>
     <string name="level_9">Golden Twilight</string>
+    <string name="level_10">Starlit Lullaby</string>
     <string name="accessibility_game">Kitten Trail. Tap a free tile to guide the kitten toward three stars and then home.</string>
     <string name="accessibility_star_found">Star found</string>
     <string name="accessibility_level_complete">Level complete</string>

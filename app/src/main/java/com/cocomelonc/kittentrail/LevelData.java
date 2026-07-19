@@ -121,7 +121,8 @@ final class LevelData {
     static LevelData[] createAll() {
         return new LevelData[]{
                 dewdropMeadow(), lavenderGarden(), moonlitPond(), peachOrchard(), starryHill(),
-                cottonCloudValley(), rosePetalPath(), mintyBrook(), goldenTwilight()
+                cottonCloudValley(), rosePetalPath(), mintyBrook(), goldenTwilight(),
+                starlitLullaby()
         };
     }
 
@@ -265,6 +266,22 @@ final class LevelData {
                 "##.####...##.#",
                 "#*....###.*..#",
                 "#...X.......H#",
+                "##############"
+        );
+    }
+
+    private static LevelData starlitLullaby() {
+        return new LevelData(
+                R.string.level_10,
+                0xFFCEC9EA, 0xFFAFB6DC, 0xFFD3DBD6, 0xFFC6D1CE,
+                0xFF7C7899, 0xFF9B96B8, 0xFFB3A2DC, 0xFFFFE07E, 11681,
+                "##############",
+                "#S..X...#.*..#",
+                "#.##.##.#.##.#",
+                "#.#*..#...#..#",
+                "#.###.###.#.##",
+                "#*..#...#...X#",
+                "###...#...#.H#",
                 "##############"
         );
     }

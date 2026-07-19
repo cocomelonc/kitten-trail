@@ -5,7 +5,7 @@
 **Author:** `cocomelonc`<br>
 **Copyright:** © 2026 cocomelonc (Zhassulan Zhussupov)
 
-Kitten Trail is a tiny, calm Android game about guiding a kitten through nine
+Kitten Trail is a tiny, calm Android game about guiding a kitten through ten
 gentle landscapes, collecting three stars, and returning to a warm little
 house. There are no ads, accounts, purchases, trackers, network calls, timers,
 lives, or game-over screens.
@@ -96,7 +96,7 @@ emulator running Android 16/API 36: English and Russian switching, Cyrillic
 font rendering, tap-to-path movement, blocked cubes and locked-home behavior,
 star collection, audio, haptics, music start/pause and Audio Focus release,
 level completion, app backgrounding, and safe resume-to-pause. Automated tests
-also prove reachability for every objective in all nine levels.
+also prove reachability for every objective in all ten levels.
 
 ### Build
 
@@ -134,7 +134,7 @@ alignment, confirms `minSdk=26` / `targetSdk=36`, and rejects unexpected native
 libraries.
 
 The unit tests validate every tilemap and perform a grid reachability check
-from the kitten's start position to every star and home in all nine levels.
+from the kitten's start position to every star and home in all ten levels.
 
 ### Controls
 
@@ -150,7 +150,7 @@ app/src/main/java/com/cocomelonc/kittentrail/
   MainActivity.java       edge-to-edge Android host and lifecycle
   KittenTrailView.java    drawing, touch input, particles and UI
   GameWorld.java          testable rules and shortest-path movement
-  LevelData.java          nine immutable 14 x 8 tilemaps and palettes
+  LevelData.java          ten immutable 14 x 8 tilemaps and palettes
   AudioEngine.java        tiny procedural chime synthesizer
   MusicEngine.java        calm original procedural background music
 app/src/test/             gameplay and level reachability tests

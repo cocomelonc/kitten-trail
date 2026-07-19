@@ -257,7 +257,7 @@ final class KittenTrailView extends View implements GameWorld.Listener {
                 paint.setColor(floor);
                 canvas.drawRoundRect(left + 1.5f, top + 1.5f,
                         left + TILE - 1.5f, top + TILE - 1.5f, 13f, 13f, paint);
-                drawFloorDetails(canvas, left, top, row, col, level.seed);
+                drawFloorDetails(canvas, left, top, row, col, level, time);
             }
         }
 
@@ -281,8 +281,12 @@ final class KittenTrailView extends View implements GameWorld.Listener {
     }
 
     private void drawFloorDetails(Canvas canvas, float left, float top,
-                                  int row, int col, int seed) {
-        int value = seed + row * 97 + col * 53;
+                                  int row, int col, LevelData level, float time) {
+        char tile = level.tileAt(row, col);
+        if (tile == LevelData.WALL || tile == LevelData.CRATE) {
+            return;
+        }
+        int value = level.seed + row * 97 + col * 53;
         if (Math.floorMod(value, 4) == 0) {
             paint.setColor(0x39749A72);
             paint.setStrokeWidth(1.5f);
@@ -293,12 +297,60 @@ final class KittenTrailView extends View implements GameWorld.Listener {
             canvas.drawLine(x, y + 3f, x + 5f, y - 7f, paint);
             paint.setStyle(Paint.Style.FILL);
         }
-        if (Math.floorMod(value, 11) == 0) {
-            paint.setColor(0xC9F5B9C5);
-            canvas.drawCircle(left + 17f, top + 18f, 2.7f, paint);
-            paint.setColor(0xDFFFF0B0);
-            canvas.drawCircle(left + 17f, top + 18f, 1.1f, paint);
+        if (tile != LevelData.FLOOR) {
+            return;
         }
+        if (Math.floorMod(value, 11) == 0) {
+            float x = left + 15f + Math.floorMod(value * 7, 38);
+            float y = top + 17f + Math.floorMod(value * 13, 34);
+            drawFlower(canvas, x, y, petalColor(level, value), 5.6f, time, value);
+        }
+        if (Math.floorMod(value, 13) == 5) {
+            float x = left + 14f + Math.floorMod(value * 5, 40);
+            float y = top + 15f + Math.floorMod(value * 17, 38);
+            drawBlossom(canvas, x, y, petalColor(level, value + 1), time, value);
+        }
+    }
+
+    private int petalColor(LevelData level, int value) {
+        int pick = Math.floorMod(value, 3);
+        if (pick == 0) {
+            return 0xFFF4B9C6;
+        }
+        if (pick == 1) {
+            return lighten(level.accentColor, 0.24f);
+        }
+        return 0xFFFDF3DC;
+    }
+
+    private void drawFlower(Canvas canvas, float cx, float cy, int petalColor,
+                            float size, float time, int phase) {
+        float sway = (float) Math.sin(time * 1.6f + Math.floorMod(phase, 628) * 0.01f) * 1.3f;
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(1.8f);
+        paint.setColor(0x7A72976D);
+        canvas.drawLine(cx, cy + size * 1.9f, cx + sway, cy + size * 0.4f, paint);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(petalColor);
+        for (int i = 0; i < 5; i++) {
+            double angle = Math.PI * 2.0 * i / 5.0 - Math.PI / 2.0;
+            canvas.drawCircle(cx + sway + (float) Math.cos(angle) * size,
+                    cy + (float) Math.sin(angle) * size, size * 0.66f, paint);
+        }
+        paint.setColor(0xFFFFE9A2);
+        canvas.drawCircle(cx + sway, cy, size * 0.5f, paint);
+    }
+
+    private void drawBlossom(Canvas canvas, float cx, float cy, int color,
+                             float time, int phase) {
+        float sway = (float) Math.sin(time * 1.9f + Math.floorMod(phase, 628) * 0.01f) * 0.9f;
+        paint.setColor(color);
+        canvas.drawCircle(cx + sway - 2.4f, cy, 2.4f, paint);
+        canvas.drawCircle(cx + sway + 2.4f, cy, 2.4f, paint);
+        canvas.drawCircle(cx + sway, cy - 2.4f, 2.4f, paint);
+        canvas.drawCircle(cx + sway, cy + 2.4f, 2.4f, paint);
+        paint.setColor(0xFFFFF2C0);
+        canvas.drawCircle(cx + sway, cy, 1.6f, paint);
     }
 
     private void drawWall(Canvas canvas, float cx, float cy, int wallColor, int topColor) {

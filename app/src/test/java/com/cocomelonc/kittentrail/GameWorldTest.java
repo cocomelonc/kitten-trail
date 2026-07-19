@@ -40,7 +40,7 @@ public final class GameWorldTest {
     }
 
     @Test
-    public void allNineTrailsCanBeCompleted() {
+    public void allTenTrailsCanBeCompleted() {
         LevelData[] levels = LevelData.createAll();
         GameWorld world = new GameWorld(levels, null);
         world.startJourney(0);
@@ -89,7 +89,7 @@ public final class GameWorldTest {
     public void savedLevelIsClampedToAvailableLevels() {
         GameWorld world = new GameWorld(LevelData.createAll(), null);
         world.startJourney(999);
-        assertEquals(8, world.getLevelIndex());
+        assertEquals(9, world.getLevelIndex());
         world.startJourney(-5);
         assertEquals(0, world.getLevelIndex());
     }
